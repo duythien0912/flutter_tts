@@ -63,6 +63,11 @@ class FlutterTts {
     return voices;
   }
 
+  Future<dynamic> synthesizeToFile(String text) async {
+    final file = await _channel.invokeMethod('synthesizeToFile', text);
+    return file;
+  }
+
   /// [Future] which invokes the platform specific method for isLanguageAvailable
   /// Returns `true` or `false`
   Future<dynamic> isLanguageAvailable(String language) =>

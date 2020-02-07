@@ -47,6 +47,10 @@ public class SwiftFlutterTtsPlugin: NSObject, FlutterPlugin, AVSpeechSynthesizer
       self.speak(text: text)
       result(1)
       break
+    case "synthesizeToFile":
+      let text: String = call.arguments as! String
+      self.synthesizeToFile(text: text, result: result)
+      break
     case "setLanguage":
       let language: String = call.arguments as! String
       self.setLanguage(language: language, result: result)
@@ -139,6 +143,10 @@ public class SwiftFlutterTtsPlugin: NSObject, FlutterPlugin, AVSpeechSynthesizer
 
   private func getLanguages(result: FlutterResult) {
     result(Array(self.languages))
+  }
+
+  private func synthesizeToFile(text: String, result: FlutterResult) {
+    result(0);
   }
 
   private func isLanguageAvailable(language: String, result: FlutterResult) {
