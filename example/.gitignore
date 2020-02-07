@@ -7,4 +7,3 @@
 build/
 
 .flutter-plugins
-lib/generated_plugin_registrant.dart

@@ -1,4 +1,4 @@
-package com.tundralabs.example;
+package com.tundralabs.flutterttsexample;
 
 import android.os.Bundle;
 

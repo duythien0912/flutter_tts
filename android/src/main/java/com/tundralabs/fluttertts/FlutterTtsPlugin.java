@@ -31,6 +31,7 @@ public class FlutterTtsPlugin implements MethodCallHandler {
     private final Handler handler;
     private final MethodChannel channel;
     private TextToSpeech tts;
+    private Context application;
     private final CountDownLatch ttsInitLatch = new CountDownLatch(1);
     private final String tag = "TTS";
     private final String googleTtsEngine = "com.google.android.tts";
@@ -47,11 +48,12 @@ public class FlutterTtsPlugin implements MethodCallHandler {
     private FlutterTtsPlugin(Context context, MethodChannel channel) {
         this.channel = channel;
         this.channel.setMethodCallHandler(this);
+        this.application = context.getApplicationContext();
 
         handler = new Handler(Looper.getMainLooper());
         bundle = new Bundle();
         tts = new TextToSpeech(context.getApplicationContext(), onInitListener, googleTtsEngine);
-    }
+    };
 
     private UtteranceProgressListener utteranceProgressListener =
             new UtteranceProgressListener() {
@@ -117,8 +119,7 @@ public class FlutterTtsPlugin implements MethodCallHandler {
             speak(text);
             result.success(1);
         } else if (call.method.equals("synthesizeToFile")) {
-            String text = call.arguments.toString();
-            synthesizeToFile(text, result);
+            synthesizeToFile(call.arguments.toString(), result);
         } else if (call.method.equals("stop")) {
             stop();
             result.success(1);
@@ -246,7 +247,7 @@ public class FlutterTtsPlugin implements MethodCallHandler {
     }
 
     private void synthesizeToFile(String text, Result result) {
-        File sampleFile = new File(Environment.getExternalStorageDirectory(), SAMPLE_FILE_NAME);
+        File sampleFile = new File(application.getCacheDir(), SAMPLE_FILE_NAME);
         try {
             if(sampleFile.exists()){
                 sampleFile.delete();
@@ -255,24 +256,24 @@ public class FlutterTtsPlugin implements MethodCallHandler {
             int resultTts = tts.synthesizeToFile(text, createParams(), sampleFile.getPath());
             
             if(TextToSpeech.SUCCESS != resultTts){
-                result.error("synthesizeToFile", String.valueOf(resultTts), "synthesizeToFile() failed");
+                result.error("synthesizeToFile", String.valueOf(resultTts), "synthesizeToFile failed");
             }
 
             // TODO: check completion timeout
             // if(TextToSpeech.SUCCESS != resultTts){
-            //     result.error("synthesizeToFile", String.valueOf(resultTts), "synthesizeToFile() failed");
+            //     result.error("synthesizeToFile", String.valueOf(resultTts), "synthesizeToFile failed");
             // }
             // assertTrue("synthesizeToFile() completion timeout", mTts.waitForComplete(UTTERANCE_ID));
 
             if(sampleFile.exists() != true){
-                result.error("synthesizeToFile", String.valueOf(resultTts), "synthesizeToFile() didn't produce a file");
+                result.error("synthesizeToFile", String.valueOf(resultTts), "synthesizeToFile didn't produce a file");
             }
 
             // if(TextToSpeechWrapper.isSoundFile(sampleFile.getPath()) != true){
-            //     result.error("synthesizeToFile", String.valueOf(resultTts), "synthesizeToFile() produced a non-sound file");
+            //     result.error("synthesizeToFile", String.valueOf(resultTts), "synthesizeToFile produced a non-sound file");
             // }
         } finally {
-            result.success(sampleFile);
+            result.success(sampleFile.getPath());
         }
     }
 
