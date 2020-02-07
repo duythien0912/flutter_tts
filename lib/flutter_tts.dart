@@ -20,6 +20,11 @@ class FlutterTts {
   /// [Future] which invokes the platform specific method for speaking
   Future<dynamic> speak(String text) => _channel.invokeMethod('speak', text);
 
+  Future<dynamic> synthesizeToFile(String text) async {
+    final file = await _channel.invokeMethod('synthesizeToFile', text);
+    return file;
+  }
+
   /// [Future] which invokes the platform specific method for setLanguage
   Future<dynamic> setLanguage(String language) =>
       _channel.invokeMethod('setLanguage', language);
@@ -61,11 +66,6 @@ class FlutterTts {
   Future<dynamic> get getVoices async {
     final voices = await _channel.invokeMethod('getVoices');
     return voices;
-  }
-
-  Future<dynamic> synthesizeToFile(String text) async {
-    final file = await _channel.invokeMethod('synthesizeToFile', text);
-    return file;
   }
 
   /// [Future] which invokes the platform specific method for isLanguageAvailable
