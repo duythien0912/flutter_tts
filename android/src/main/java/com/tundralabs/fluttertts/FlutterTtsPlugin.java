@@ -253,21 +253,23 @@ public class FlutterTtsPlugin implements MethodCallHandler {
             }
 
             int resultTts = tts.synthesizeToFile(text, createParams(), sampleFile.getPath());
+            
             if(TextToSpeech.SUCCESS != resultTts){
-                result.error("synthesizeToFile", resultTts, "synthesizeToFile() failed");
+                result.error("synthesizeToFile", String.valueOf(resultTts), "synthesizeToFile() failed");
             }
 
             // TODO: check completion timeout
             // if(TextToSpeech.SUCCESS != resultTts){
-            //     result.error("synthesizeToFile", resultTts, "synthesizeToFile() failed");
+            //     result.error("synthesizeToFile", String.valueOf(resultTts), "synthesizeToFile() failed");
             // }
             // assertTrue("synthesizeToFile() completion timeout", mTts.waitForComplete(UTTERANCE_ID));
 
             if(!sampleFile.exists()){
-                result.error("synthesizeToFile", resultTts, "synthesizeToFile() didn't produce a file");
+                result.error("synthesizeToFile", String.valueOf(resultTts), "synthesizeToFile() didn't produce a file");
             }
+
             if(!TextToSpeechWrapper.isSoundFile(sampleFile.getPath())){
-                result.error("synthesizeToFile", resultTts, "synthesizeToFile() produced a non-sound file");
+                result.error("synthesizeToFile", String.valueOf(resultTts), "synthesizeToFile() produced a non-sound file");
             }
         } finally {
             result.success(sampleFile);
