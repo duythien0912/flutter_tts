@@ -264,11 +264,11 @@ public class FlutterTtsPlugin implements MethodCallHandler {
             // }
             // assertTrue("synthesizeToFile() completion timeout", mTts.waitForComplete(UTTERANCE_ID));
 
-            if(!sampleFile.exists()){
+            if(sampleFile.exists() != true){
                 result.error("synthesizeToFile", String.valueOf(resultTts), "synthesizeToFile() didn't produce a file");
             }
 
-            if(!TextToSpeechWrapper.isSoundFile(sampleFile.getPath())){
+            if(TextToSpeechWrapper.isSoundFile(sampleFile.getPath()) != true){
                 result.error("synthesizeToFile", String.valueOf(resultTts), "synthesizeToFile() produced a non-sound file");
             }
         } finally {
