@@ -5,11 +5,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Environment;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.speech.tts.Voice;
 import android.util.Log;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -36,6 +38,8 @@ public class FlutterTtsPlugin implements MethodCallHandler {
     Bundle bundle;
     private int silencems;
     private static final String SILENCE_PREFIX = "SIL_";
+    private static final String SAMPLE_FILE_NAME = "ttsfile.wav";
+    private static final String UTTERANCE_ID = "ttsid";
 
     /**
      * Plugin registration.
@@ -112,6 +116,9 @@ public class FlutterTtsPlugin implements MethodCallHandler {
             String text = call.arguments.toString();
             speak(text);
             result.success(1);
+        } else if (call.method.equals("synthesizeToFile")) {
+            String text = call.arguments.toString();
+            synthesizeToFile(text, result);
         } else if (call.method.equals("stop")) {
             stop();
             result.success(1);
@@ -236,6 +243,41 @@ public class FlutterTtsPlugin implements MethodCallHandler {
         } else {
             tts.speak(text, TextToSpeech.QUEUE_FLUSH, bundle, uuid);
         }
+    }
+
+    private void synthesizeToFile(String text, Result result) {
+        File sampleFile = new File(Environment.getExternalStorageDirectory(), SAMPLE_FILE_NAME);
+        try {
+            if(sampleFile.exists()){
+                sampleFile.delete();
+            }
+
+            int resultTts = tts.synthesizeToFile(text, createParams(), sampleFile.getPath());
+            if(TextToSpeech.SUCCESS != resultTts){
+                result.error("synthesizeToFile", resultTts, "synthesizeToFile() failed");
+            }
+
+            // TODO: check completion timeout
+            // if(TextToSpeech.SUCCESS != resultTts){
+            //     result.error("synthesizeToFile", resultTts, "synthesizeToFile() failed");
+            // }
+            // assertTrue("synthesizeToFile() completion timeout", mTts.waitForComplete(UTTERANCE_ID));
+
+            if(!sampleFile.exists()){
+                result.error("synthesizeToFile", resultTts, "synthesizeToFile() didn't produce a file");
+            }
+            if(!TextToSpeechWrapper.isSoundFile(sampleFile.getPath())){
+                result.error("synthesizeToFile", resultTts, "synthesizeToFile() produced a non-sound file");
+            }
+        } finally {
+            result.success(sampleFile);
+        }
+    }
+
+    private HashMap<String, String> createParams() {
+        HashMap<String, String> params = new HashMap<String,String>();
+        params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, UTTERANCE_ID);
+        return params;
     }
 
     private void stop() {
